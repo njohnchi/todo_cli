@@ -23,12 +23,19 @@ fn main() {
     }
 }
 
-
-
-struct Command {
-    action: String,
-    argument: Option<String>,
+enum Command {
+    Quit,
+    Add(String),
+    List,
+    Complete(u32),
+    Delete(u32),
+    Help,
 }
+
+// struct Command {
+//     action: String,
+//     argument: Option<String>,
+// }
 
 impl Command {
     fn build(input: &String) -> Result<Command, &'static str> {
@@ -38,20 +45,40 @@ impl Command {
             return Err("No Command given");
         }
 
-        let action = parts[0].to_string();
-        let argument = if parts.len() > 1 {
-            Some(parts[1].to_string())
-        } else {
-            None
-        };
+        let action = parts[0].to_lowercase();
+        let argument = parts.get(1).map(|&s| s.to_string());
 
-        Ok(Command { action, argument })
+        match action.as_str() {
+            "quit" => Ok(Command::Quit),
+            "add" => argument.map(Command::Add).ok_or("Missing argument for add command"),
+            "list" => Ok(Command::List),
+            "complete" => {
+                argument
+                    .ok_or("Missing argument for complete command")
+                    .and_then(|arg| arg.parse::<u32>().map(Command::Complete).map_err(|_| "Invalid number for complete command"))
+            }
+            "delete" => {
+                argument
+                    .ok_or("Missing argument for delete command")
+                    .and_then(|arg| arg.parse::<u32>().map(Command::Delete).map_err(|_| "Invalid number for delete command"))
+            }
+            "help" => Ok(Command::Help),
+            _ => Err("Invalid command given"),
+        }
     }
 }
 fn process(command: Command) -> Result<(), &'static str> {
-    println!("Action: {}", command.action);
-    let arg = command.argument.unwrap_or_else(|| String::new());
-    println!("Argument: {}", arg);
+    match command {
+        Command::Quit => {
+            println!("Quitting...");
+            std::process::exit(0);
+        }
+        Command::Add(task) => println!("Added task: {}", task),
+        Command::List => println!("Listing tasks..."),
+        Command::Complete(index) => println!("Completed task at index: {}", index),
+        Command::Delete(index) => println!("Deleted task at index: {}", index),
+        Command::Help => println!("Help: Available commands are quit, add, list, complete, delete, help"),
+    }
     Ok(())
 }
 
