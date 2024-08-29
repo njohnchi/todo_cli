@@ -32,11 +32,6 @@ enum Command {
     Help,
 }
 
-// struct Command {
-//     action: String,
-//     argument: Option<String>,
-// }
-
 impl Command {
     fn build(input: &String) -> Result<Command, &'static str> {
         let parts: Vec<&str> = input.trim().split_whitespace().collect();
@@ -77,7 +72,7 @@ fn process(command: Command) -> Result<(), &'static str> {
         Command::List => println!("Listing tasks..."),
         Command::Complete(index) => println!("Completed task at index: {}", index),
         Command::Delete(index) => println!("Deleted task at index: {}", index),
-        Command::Help => println!("Help: Available commands are quit, add, list, complete, delete, help"),
+        Command::Help => display_help(),
     }
     Ok(())
 }
@@ -89,4 +84,21 @@ fn get_input() -> Result<String, &'static str> {
         Ok(_) => Ok(input.trim().to_string()),
         Err(_) => Err("Failed to read input"),
     }
+}
+
+fn display_help() {
+    println!("TODO CLI Help:");
+    println!();
+    println!("Available commands:");
+    println!("  quit                - Quit the application.");
+    println!("  add <task>          - Add a new task to the list.");
+    println!("  list                - List all tasks.");
+    println!("  complete <index>    - Mark the task at the given index as complete.");
+    println!("  delete <index>      - Delete the task at the given index.");
+    println!("  help                - Show this help message.");
+    println!();
+    println!("Examples:");
+    println!("  add \"Buy groceries\"  - Adds a new task with the description 'Buy groceries'.");
+    println!("  complete 1          - Marks the task at index 1 as complete.");
+    println!("  delete 2            - Deletes the task at index 2.");
 }
